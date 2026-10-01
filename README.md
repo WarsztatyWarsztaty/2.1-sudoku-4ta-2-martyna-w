@@ -9,4 +9,4 @@
 - Stan po 25 minutach: działa 
 - Skąd wiem, że aplikacja działa (co zostało sprawdzone): zagralismy w sudoku
 - Rzeczy, które agent zrobił, a których nie rozumiem: pytał za dużo razy
-- Jak mi się wydawało, że poszło (jedno zdanie): dobrze
+- Jak mi się wydawało, że poszło (jedno zdanie): średnio
