@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sudoku Mistrz - Polska Aplikacja Pulpitowa</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+</head>
+<body class="theme-dark">
+  <canvas id="confetti-canvas"></canvas>
+
+  <div class="app-layout">
+    <!-- Górny pasek nawigacji -->
+    <header class="top-nav">
+      <div class="brand">
+        <div class="brand-icon">
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="18" height="18" rx="3" />
+            <path d="M9 3v18M15 3v18M3 9h18M3 15h18" />
+          </svg>
+        </div>
+        <div class="brand-text">
+          <span class="brand-title">Sudoku Mistrz</span>
+          <span class="brand-badge">PRO</span>
+        </div>
+      </div>
+
+      <div class="nav-actions">
+        <!-- Przełącznik poziomu trudności -->
+        <div class="difficulty-picker">
+          <button type="button" class="btn-diff active" data-diff="easy">Łatwy</button>
+          <button type="button" class="btn-diff" data-diff="medium">Średni</button>
+          <button type="button" class="btn-diff" data-diff="hard">Trudny</button>
+          <button type="button" class="btn-diff" data-diff="expert">Ekspert</button>
+        </div>
+
+        <div class="icon-buttons">
+          <!-- Motyw Jasny / Ciemny -->
+          <button id="theme-toggle-btn" class="icon-btn" title="Przełącz motyw (Jasny / Ciemny) [Ctrl+T]">
+            <svg id="theme-icon-sun" class="hidden" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="5"></circle>
+              <line x1="12" y1="1" x2="12" y2="3"></line>
+              <line x1="12" y1="21" x2="12" y2="23"></line>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+              <line x1="1" y1="12" x2="3" y2="12"></line>
+              <line x1="21" y1="12" x2="23" y2="12"></line>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+            </svg>
+            <svg id="theme-icon-moon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            </svg>
+          </button>
+
+          <!-- Dźwięk -->
+          <button id="audio-toggle-btn" class="icon-btn" title="Wycisz / Włącz dźwięk">
+            <svg id="audio-icon-on" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+              <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+            </svg>
+            <svg id="audio-icon-muted" class="hidden" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="1" y1="1" x2="23" y2="23"></line>
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+              <path d="M23 9l-6 6"></path>
+              <path d="M17 9l6 6"></path>
+            </svg>
+          </button>
+
+          <!-- Statystyki -->
+          <button id="stats-open-btn" class="icon-btn" title="Statystyki gracza [Ctrl+S]">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 20V10M12 20V4M6 20v-6"></path>
+            </svg>
+          </button>
+
+          <!-- Ustawienia -->
+          <button id="settings-open-btn" class="icon-btn" title="Ustawienia rozgrywki">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+          </button>
+
+          <!-- Pomoc / Zasady -->
+          <button id="rules-open-btn" class="icon-btn" title="Zasady gry i skróty klawiszowe">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+              <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Główna zawartość gry -->
+    <main class="game-container">
+      <!-- Pasek informacyjny rozgrywki -->
+      <section class="status-panel">
+        <div class="status-item difficulty-badge">
+          <span class="status-label">Trudność</span>
+          <span id="current-diff-display" class="status-val highlight">Średni</span>
+        </div>
+
+        <div class="status-item mistakes-badge">
+          <span class="status-label">Błędy</span>
+          <span id="mistakes-display" class="status-val">0 / 3</span>
+        </div>
+
+        <div class="status-item score-badge">
+          <span class="status-label">Wynik</span>
+          <span id="score-display" class="status-val font-mono">0</span>
+        </div>
+
+        <div class="status-item timer-badge">
+          <span class="status-label">Czas</span>
+          <div class="timer-wrapper">
+            <span id="timer-display" class="status-val font-mono">00:00</span>
+            <button id="pause-btn" class="pause-toggle-btn" title="Pauza / Wznów [Spacja]">
+              <svg id="pause-icon" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                <rect x="6" y="4" width="4" height="16" rx="1"></rect>
+                <rect x="14" y="4" width="4" height="16" rx="1"></rect>
+              </svg>
+              <svg id="play-icon" class="hidden" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Baner logicznej podpowiedzi (toast) -->
+      <div id="hint-banner" class="hint-banner hidden">
+        <div class="hint-icon">💡</div>
+        <div id="hint-text" class="hint-text">Wskazówka pojawi się tutaj...</div>
+        <button id="hint-close-btn" class="hint-close">✕</button>
+      </div>
+
+      <!-- Plansza i kontrolki w responsywnym układzie -->
+      <div class="board-and-controls">
+        <!-- Plansza Sudoku -->
+        <div class="board-wrapper">
+          <div id="sudoku-grid" class="sudoku-grid" tabindex="0">
+            <!-- 81 pól generowanych dynamicznie przez JS -->
+          </div>
+
+          <!-- Ekran pauzy -->
+          <div id="pause-overlay" class="pause-overlay hidden">
+            <div class="pause-card">
+              <div class="pause-icon-big">⏸️</div>
+              <h2>Gra wstrzymana</h2>
+              <p>Plansza jest ukryta w trakcie pauzy.</p>
+              <button id="resume-btn" class="btn btn-primary">Wznów grę (Spacja)</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Prawy panel narzędzi i klawiatury numerycznej -->
+        <aside class="side-controls">
+          <!-- Przyciski akcji -->
+          <div class="action-buttons-grid">
+            <button id="btn-undo" class="tool-btn" title="Cofnij ostatni ruch [Ctrl+Z]">
+              <div class="tool-icon">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M3 7v6h6"></path>
+                  <path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"></path>
+                </svg>
+              </div>
+              <span class="tool-name">Cofnij</span>
+            </button>
+
+            <button id="btn-erase" class="tool-btn" title="Wymaż cyfrę z wybranego pola [Backspace/Del]">
+              <div class="tool-icon">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M19 19H8.5L3 13.5l8.5-8.5 10 10-2.5 4z"></path>
+                  <line x1="18" y1="13" x2="12" y2="7"></line>
+                </svg>
+              </div>
+              <span class="tool-name">Wymaż</span>
+            </button>
+
+            <button id="btn-notes" class="tool-btn" title="Przełącz notatki ołówkiem [N]">
+              <div class="notes-indicator" id="notes-indicator">WYŁ</div>
+              <div class="tool-icon">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+                </svg>
+              </div>
+              <span class="tool-name">Notatki (N)</span>
+            </button>
+
+            <button id="btn-hint" class="tool-btn" title="Inteligentna podpowiedź [H]">
+              <div class="tool-icon">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.8V17h8v-2.2A7 7 0 0 0 12 2z"></path>
+                </svg>
+              </div>
+              <span class="tool-name">Podpowiedź</span>
+            </button>
+          </div>
+
+          <!-- Klawiatura numeryczna 1-9 z licznikami pozostałych cyfr -->
+          <div class="numpad-container">
+            <div class="numpad-label">Wprowadź cyfrę (1–9):</div>
+            <div class="numpad-grid">
+              <button class="numpad-btn" data-val="1">
+                <span class="num-val">1</span>
+                <span class="num-remain" id="remain-1">9</span>
+              </button>
+              <button class="numpad-btn" data-val="2">
+                <span class="num-val">2</span>
+                <span class="num-remain" id="remain-2">9</span>
+              </button>
+              <button class="numpad-btn" data-val="3">
+                <span class="num-val">3</span>
+                <span class="num-remain" id="remain-3">9</span>
+              </button>
+              <button class="numpad-btn" data-val="4">
+                <span class="num-val">4</span>
+                <span class="num-remain" id="remain-4">9</span>
+              </button>
+              <button class="numpad-btn" data-val="5">
+                <span class="num-val">5</span>
+                <span class="num-remain" id="remain-5">9</span>
+              </button>
+              <button class="numpad-btn" data-val="6">
+                <span class="num-val">6</span>
+                <span class="num-remain" id="remain-6">9</span>
+              </button>
+              <button class="numpad-btn" data-val="7">
+                <span class="num-val">7</span>
+                <span class="num-remain" id="remain-7">9</span>
+              </button>
+              <button class="numpad-btn" data-val="8">
+                <span class="num-val">8</span>
+                <span class="num-remain" id="remain-8">9</span>
+              </button>
+              <button class="numpad-btn" data-val="9">
+                <span class="num-val">9</span>
+                <span class="num-remain" id="remain-9">9</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Główne przyciski rozpoczęcia nowej gry / restartu -->
+          <div class="primary-controls">
+            <button id="btn-new-game" class="btn btn-primary full-width">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 5v14M5 12h14"></path>
+              </svg>
+              Nowa gra
+            </button>
+            <button id="btn-restart" class="btn btn-secondary full-width">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"></path>
+              </svg>
+              Zacznij od nowa
+            </button>
+          </div>
+        </aside>
+      </div>
+    </main>
+
+    <!-- MODAL: Statystyki gracza -->
+    <div id="modal-stats" class="modal-backdrop hidden">
+      <div class="modal-card modal-lg">
+        <div class="modal-header">
+          <div class="modal-title-with-icon">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 20V10M12 20V4M6 20v-6"></path>
+            </svg>
+            <h2>Statystyki gracza</h2>
+          </div>
+          <button class="modal-close-btn" data-modal="modal-stats">✕</button>
+        </div>
+
+        <div class="modal-body">
+          <!-- Zakładki poziomów w statystykach -->
+          <div class="stats-tabs">
+            <button class="stats-tab-btn active" data-stab="overall">Podsumowanie</button>
+            <button class="stats-tab-btn" data-stab="easy">Łatwy</button>
+            <button class="stats-tab-btn" data-stab="medium">Średni</button>
+            <button class="stats-tab-btn" data-stab="hard">Trudny</button>
+            <button class="stats-tab-btn" data-stab="expert">Ekspert</button>
+            <button class="stats-tab-btn" data-stab="history">Historia gier</button>
+          </div>
+
+          <!-- Zawartość wybranej zakładki -->
+          <div id="stats-tab-content" class="stats-tab-content">
+            <!-- Dynamicznie wstawiane przez stats.js / app.js -->
+          </div>
+        </div>
+
+        <div class="modal-footer space-between">
+          <button id="btn-reset-stats" class="btn btn-danger-outline">Zresetuj statystyki</button>
+          <button class="btn btn-secondary modal-close-btn" data-modal="modal-stats">Zamknij</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL: Wygrana! -->
+    <div id="modal-win" class="modal-backdrop hidden">
+      <div class="modal-card modal-center text-center">
+        <div class="win-crown">🏆</div>
+        <h2 class="win-title">Gratulacje! Wygrałeś!</h2>
+        <p class="win-subtitle">Plansza Sudoku została bezbłędnie ukończona.</p>
+
+        <div class="win-summary-grid">
+          <div class="win-stat-box">
+            <div class="win-stat-label">Poziom trudności</div>
+            <div id="win-diff" class="win-stat-val">Średni</div>
+          </div>
+          <div class="win-stat-box">
+            <div class="win-stat-label">Twój czas</div>
+            <div id="win-time" class="win-stat-val font-mono">04:32</div>
+          </div>
+          <div class="win-stat-box">
+            <div class="win-stat-label">Błędy</div>
+            <div id="win-mistakes" class="win-stat-val">1</div>
+          </div>
+          <div class="win-stat-box">
+            <div class="win-stat-label">Zdobyte punkty</div>
+            <div id="win-score" class="win-stat-val font-mono">2450</div>
+          </div>
+        </div>
+
+        <div id="win-record-badge" class="win-record-badge hidden">
+          ⭐ Nowy rekord czasowy na tym poziomie!
+        </div>
+
+        <div class="modal-footer center-gap">
+          <button id="win-new-game-btn" class="btn btn-primary">Zagraj kolejną partię</button>
+          <button id="win-show-stats-btn" class="btn btn-secondary">Zobacz statystyki</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL: Przegrana (Koniec gry) -->
+    <div id="modal-gameover" class="modal-backdrop hidden">
+      <div class="modal-card modal-center text-center">
+        <div class="gameover-icon">❌</div>
+        <h2>Koniec gry</h2>
+        <p>Popełniono 3 błędy na tej planszy. Nie zrażaj się, trening czyni mistrza!</p>
+        <div class="modal-footer center-gap">
+          <button id="gameover-restart-btn" class="btn btn-secondary">Spróbuj ponownie</button>
+          <button id="gameover-new-btn" class="btn btn-primary">Nowa plansza</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL: Ustawienia -->
+    <div id="modal-settings" class="modal-backdrop hidden">
+      <div class="modal-card">
+        <div class="modal-header">
+          <div class="modal-title-with-icon">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+            <h2>Ustawienia rozgrywki</h2>
+          </div>
+          <button class="modal-close-btn" data-modal="modal-settings">✕</button>
+        </div>
+
+        <div class="modal-body settings-list">
+          <div class="setting-item">
+            <div class="setting-info">
+              <span class="setting-title">Limit 3 błędów</span>
+              <span class="setting-desc">Gra kończy się po zrobieniu 3 błędnych wpisów</span>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="setting-mistake-limit" checked>
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <div class="setting-item">
+            <div class="setting-info">
+              <span class="setting-title">Wyróżnianie tej samej cyfry</span>
+              <span class="setting-desc">Podświetla na planszy wszystkie identyczne cyfry</span>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="setting-highlight-same" checked>
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <div class="setting-item">
+            <div class="setting-info">
+              <span class="setting-title">Wyróżnianie wiersza, kolumny i bloku</span>
+              <span class="setting-desc">Ułatwia orientację wokół aktywnego pola</span>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="setting-highlight-area" checked>
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <div class="setting-item">
+            <div class="setting-info">
+              <span class="setting-title">Automatyczne czyszczenie notatek</span>
+              <span class="setting-desc">Usuwa zbędne ołówkowe notatki z wiersza, kolumny i kwadratu po wpisaniu poprawnej cyfry</span>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="setting-auto-clear-notes" checked>
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <div class="setting-item">
+            <div class="setting-info">
+              <span class="setting-title">Efekty dźwiękowe</span>
+              <span class="setting-desc">Dźwięki wprowadzania, wymazywania i zwycięstwa</span>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="setting-sound" checked>
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-primary modal-close-btn" data-modal="modal-settings">Gotowe</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL: Zasady i Pomoc -->
+    <div id="modal-rules" class="modal-backdrop hidden">
+      <div class="modal-card modal-lg">
+        <div class="modal-header">
+          <div class="modal-title-with-icon">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+              <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+            <h2>Zasady Sudoku i Skróty klawiszowe</h2>
+          </div>
+          <button class="modal-close-btn" data-modal="modal-rules">✕</button>
+        </div>
+
+        <div class="modal-body rules-content">
+          <h3>Podstawowe zasady gry</h3>
+          <p>Sudoku to logiczna łamigłówka liczbowa. Twoim celem jest wypełnienie siatki 9×9 cyframi od 1 do 9 tak, aby:</p>
+          <ul class="rules-list">
+            <li>Każdy z 9 wierszy zawierał cyfry od 1 do 9 bez powtórzeń.</li>
+            <li>Każda z 9 kolumn zawierała cyfry od 1 do 9 bez powtórzeń.</li>
+            <li>Każdy z 9 małych kwadratów 3×3 zawierał cyfry od 1 do 9 bez powtórzeń.</li>
+          </ul>
+
+          <h3 class="mt-4">Wygodne skróty klawiszowe na pulpicie</h3>
+          <div class="shortcuts-table">
+            <div class="shortcut-row">
+              <span class="kbd">1</span> – <span class="kbd">9</span>
+              <span>Wpisz cyfrę lub dodaj/usuń notatkę ołówkiem</span>
+            </div>
+            <div class="shortcut-row">
+              <span class="kbd">Strzałki</span> / <span class="kbd">W</span><span class="kbd">A</span><span class="kbd">S</span><span class="kbd">D</span>
+              <span>Poruszanie się po siatce Sudoku</span>
+            </div>
+            <div class="shortcut-row">
+              <span class="kbd">N</span>
+              <span>Przełączanie trybu notatek (ołówek)</span>
+            </div>
+            <div class="shortcut-row">
+              <span class="kbd">Backspace</span> / <span class="kbd">Delete</span>
+              <span>Wymazywanie cyfry lub notatek z wybranego pola</span>
+            </div>
+            <div class="shortcut-row">
+              <span class="kbd">Ctrl</span> + <span class="kbd">Z</span>
+              <span>Cofnij ostatni ruch (Undo)</span>
+            </div>
+            <div class="shortcut-row">
+              <span class="kbd">H</span>
+              <span>Inteligentna podpowiedź z logicznym uzasadnieniem</span>
+            </div>
+            <div class="shortcut-row">
+              <span class="kbd">Spacja</span>
+              <span>Pauza / Wznowienie rozgrywki</span>
+            </div>
+            <div class="shortcut-row">
+              <span class="kbd">Ctrl</span> + <span class="kbd">T</span>
+              <span>Szybkie przełączenie motywu (Jasny / Ciemny)</span>
+            </div>
+            <div class="shortcut-row">
+              <span class="kbd">Ctrl</span> + <span class="kbd">S</span>
+              <span>Otwórz okno statystyk gracza</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-primary modal-close-btn" data-modal="modal-rules">Rozumiem, gramy!</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Skrypty aplikacji -->
+  <script src="js/audio.js"></script>
+  <script src="js/confetti.js"></script>
+  <script src="js/stats.js"></script>
+  <script src="js/sudoku-engine.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
